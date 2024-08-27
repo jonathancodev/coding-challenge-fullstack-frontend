@@ -27,9 +27,10 @@ export default function LoginForm() {
     },
     validationSchema: schema,
     onSubmit: async (values) => {
-        const data = await post('/auth/login', values);
+        const response = await post('/auth/login', values);
 
-        if (data) {
+        if (response) {
+          const data = await response.json();
           saveOnStorage('jwtToken', data.token);
           navigate('/');
         }

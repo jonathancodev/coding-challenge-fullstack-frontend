@@ -1,15 +1,8 @@
 import { experimentalStyled as styled } from '@mui/material';
-import { Container, Stack, Typography } from '@mui/material';
+import { Box, Container, Stack, Typography } from '@mui/material';
 import ExecuteOperationForm from '../../components/operation/ExecuteOperationForm';
 
-const RootStyle = styled('div')(({ theme }) => ({
-  [theme.breakpoints.up('md')]: {
-    display: 'flex'
-  }
-}));
-
 const ContentStyle = styled('div')(({ theme }) => ({
-  maxWidth: 480,
   margin: 'auto',
   display: 'flex',
   minHeight: '100vh',
@@ -22,8 +15,7 @@ const ContentStyle = styled('div')(({ theme }) => ({
 
 export default function ExecuteOperation() {
   return (
-    <RootStyle title="Execute Operation">
-
+    <Box>
       <Container maxWidth="sm">
         <ContentStyle>
           <Stack sx={{ mb: 5 }}>
@@ -34,6 +26,6 @@ export default function ExecuteOperation() {
           <ExecuteOperationForm />
         </ContentStyle>
       </Container>
-    </RootStyle>
+    </Box>
   );
 }

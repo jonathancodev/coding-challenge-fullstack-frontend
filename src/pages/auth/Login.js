@@ -1,15 +1,8 @@
 import { experimentalStyled as styled } from '@mui/material';
-import { Container, Stack, Typography } from '@mui/material';
+import { Box, Container, Stack, Typography } from '@mui/material';
 import LoginForm from '../../components/auth/LoginForm';
 
-const RootStyle = styled('div')(({ theme }) => ({
-  [theme.breakpoints.up('md')]: {
-    display: 'flex'
-  }
-}));
-
 const ContentStyle = styled('div')(({ theme }) => ({
-  maxWidth: 480,
   margin: 'auto',
   display: 'flex',
   minHeight: '100vh',
@@ -22,8 +15,7 @@ const ContentStyle = styled('div')(({ theme }) => ({
 
 export default function Login() {
   return (
-    <RootStyle title="Login">
-
+    <Box>
       <Container maxWidth="sm">
         <ContentStyle>
           <Stack sx={{ mb: 5 }}>
@@ -34,6 +26,6 @@ export default function Login() {
           <LoginForm />
         </ContentStyle>
       </Container>
-    </RootStyle>
+    </Box>
   );
 }

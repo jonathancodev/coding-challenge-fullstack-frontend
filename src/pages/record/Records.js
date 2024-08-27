@@ -1,15 +1,8 @@
-import { experimentalStyled as styled } from '@mui/material';
+import { Box, experimentalStyled as styled } from '@mui/material';
 import { Container, Stack, Typography } from '@mui/material';
 import RecordList from '../../components/record/RecordList';
 
-const RootStyle = styled('div')(({ theme }) => ({
-  [theme.breakpoints.up('md')]: {
-    display: 'flex'
-  }
-}));
-
 const ContentStyle = styled('div')(({ theme }) => ({
-  maxWidth: 480,
   margin: 'auto',
   display: 'flex',
   minHeight: '100vh',
@@ -18,13 +11,10 @@ const ContentStyle = styled('div')(({ theme }) => ({
   padding: theme.spacing(12, 0)
 }));
 
-// ----------------------------------------------------------------------
-
 export default function Records() {
   return (
-    <RootStyle title="Records">
-
-      <Container maxWidth="sm">
+    <Box>
+      <Container maxWidth="lg">
         <ContentStyle>
           <Stack sx={{ mb: 5 }}>
             <Typography variant="h4" gutterBottom>
@@ -34,6 +24,6 @@ export default function Records() {
           <RecordList />
         </ContentStyle>
       </Container>
-    </RootStyle>
+    </Box>
   );
 }

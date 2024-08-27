@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   Box,
@@ -6,6 +6,8 @@ import {
   Card,
   CircularProgress,
   Container,
+  InputAdornment,
+  OutlinedInput,
   Stack,
   Table,
   TableHead,
@@ -16,38 +18,54 @@ import {
   TableSortLabel
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
+import { experimentalStyled as styled } from '@mui/material/styles';
 import usePagination from '../../common/hooks/usePagination';
 import Scrollbar from '../../components/Scrollbar';
 import SearchNotFound from '../../components/SearchNotFound';
 import { toast } from 'react-toastify';
 import CustomPagination from '../../components/common/CustomPagination';
-import { get } from '../../common/client/fetchApi';
+import DeleteModal from '../../components/common/DeleteModal';
+import { get, patch } from '../../common/client/fetchApi';
 
 const TABLE_HEAD = [
   { id: 'id', label: '#', alignRight: false },
   { id: 'operation', label: 'Operation', alignRight: false },
-  { id: 'amount', label: 'amount', alignRight: false },
-  { id: 'balance', label: 'Balance', alignRight: false },
+  { id: 'amount', label: 'Amount', alignRight: false },
+  { id: 'userBalance', label: 'Balance', alignRight: false },
   { id: 'operationResponse', label: 'Operation Response', alignRight: false },
   { id: 'date', label: 'Date', alignRight: false },
   { id: '' }
 ];
 
+const SearchStyle = styled(OutlinedInput)(({ theme }) => ({
+  width: 240,
+  transition: theme.transitions.create(['box-shadow', 'width'], {
+    easing: theme.transitions.easing.easeInOut,
+    duration: theme.transitions.duration.shorter
+  }),
+  '&.Mui-focused': { width: 320 },
+  '& fieldset': {
+    borderWidth: `1px !important`,
+    borderColor: `${theme.palette.grey[500_32]} !important`
+  }
+}))
+
 export default function RecordList() {
   const [loading, setLoading] = useState(false);
-
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [recordsPagination, setRecordsPagination] = useState(null);
   const [records, setRecords] = useState([]);
-
+  const [deleteRecordId, setDeleteRecordId] = useState(null);
   const timerRef = useRef(null);
 
   const fetchAllRecords = async (config = paginationConfig) => {
     const { limit, term, sortField, sortOrder } = config;
     const page = config.page - 1;
-    const data = await get(`/records?page=${page}&limit=${limit}&term=${term}&sortBy=${sortField}&sortDirection=${sortOrder}`);
+    const response = await get(`/operations/records?page=${page}&size=${limit}&term=${term}&sortBy=${sortField}&sortDirection=${sortOrder}`);
 
-    if (data) {
-      setRecords(data.content);
-      setPaginationOptions({pages: data.totalPages, total: data.totalElements});
+    if (response) {
+      const data = await response.json();
+      setRecordsPagination(data);
     }
 
     setLoading(false);
@@ -59,6 +77,13 @@ export default function RecordList() {
     run();
     setLoading(true);
   }, []);
+
+  useEffect(() => {
+    if (recordsPagination) {
+      setRecords(recordsPagination.content);
+      setPaginationOptions({pages: recordsPagination.totalPages, total: recordsPagination.totalElements});
+    }
+  }, [recordsPagination]);
 
   const handleRequestSort = (property) => {
     const isAsc = paginationConfig.sortField === property && paginationConfig.sortOrder === 'asc';
@@ -91,9 +116,38 @@ export default function RecordList() {
     }, 1500);
   };
 
+  const handleOpenModalDeleteRecord = async (id) => {
+    setDeleteRecordId(id);
+    setShowDeleteModal(true);    
+  };
+
+  const handleDeleteRecord = async () => {
+    setShowDeleteModal(false);
+    const response = await patch(`/operations/records/${deleteRecordId}`);
+
+    if (response && response.status === 200) {
+      toast.success('Record deleted successfully');
+      setLoading(true);
+      run();
+    }
+    
+  };
+
   return (
     <Container>
+      {showDeleteModal && <DeleteModal onCancel={() => setShowDeleteModal(false)} onSubmit={handleDeleteRecord} />}
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
+      <SearchStyle
+        value={paginationConfig.term}
+        onChange={handleSearch}
+        placeholder="Search..."
+        startAdornment={
+          <InputAdornment position="start">
+            <Box sx={{ color: 'text.disabled' }} />
+          </InputAdornment>
+        }
+      />
+
         <Button
           color={'secondary'}
           variant="contained"
@@ -107,7 +161,7 @@ export default function RecordList() {
       {loading && <Stack direction="row" alignItems="center" justifyContent="center" my={'25%'}><CircularProgress /></Stack>}
       {!loading && 
         <>
-          {records && records.length > 0 && 
+          {recordsPagination && records && records.length > 0 && 
             <Card>
               <CustomPagination 
                 onChangePage={handleChangePage} 
@@ -157,8 +211,7 @@ export default function RecordList() {
                               <TableCell align="left">{row.userBalance}</TableCell>
                               <TableCell align="left">{row.operationResponse}</TableCell>
                               <TableCell align="left">{row.date}</TableCell>
-                              <TableCell align="right">
-                              </TableCell>
+                              <TableCell align="right"><Button onClick={() => handleOpenModalDeleteRecord(row.id)}>Delete</Button></TableCell>
                             </TableRow>
                           );
                         })}
@@ -166,16 +219,10 @@ export default function RecordList() {
                   </Table>
                 </TableContainer>
               </Scrollbar>
-
-              <CustomPagination 
-              onChangePage={handleChangePage} 
-              onChangeLimit={handleChangeRowsPerPage} 
-              paginationConfig={paginationConfig} 
-              />
             </Card>
           }
 
-          {records && records.length === 0 && (
+          {recordsPagination && records && records.length === 0 && (
             <SearchNotFound searchQuery={paginationConfig.term} />
           )}
         </>

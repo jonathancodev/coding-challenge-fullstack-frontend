@@ -14,7 +14,10 @@ export const saveOnStorage = (name, item) => {
 
 export const clearFromStorage = name => {
   if (typeof sessionStorage !== 'undefined') {
-    sessionStorage.removeItem(name);
+    const item = resolveOnStorage(name);
+    if (item) {
+      sessionStorage.removeItem(name);
+    }
   }
 }
 
@@ -29,5 +32,6 @@ export const replaceAll = (text, toRemove, toReplace) => {
 export default {
   resolveOnStorage,
   saveOnStorage,
+  clearFromStorage,
   errorMessage
 }

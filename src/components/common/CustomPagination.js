@@ -36,7 +36,7 @@ export default function CustomPagination({onChangePage, onChangeLimit, paginatio
   return (
     <Grid sx={{ textAlign: 'center', padding: '20px' }} gridRow={2}>
       <Grid item xs={12} gridRow={1} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <span style={{ paddingRight: '5px' }}>{'Showing '}</span>
+        <span style={{ paddingRight: '5px' }}>{'Showing '}</span>
         <TextField
           select
           size='small'

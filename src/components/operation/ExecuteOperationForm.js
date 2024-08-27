@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { Form, FormikProvider, useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import {
+  Button,
   MenuItem,
   Stack,
   TextField,
@@ -37,9 +38,10 @@ function ExecuteOperationForm() {
   });
 
   const fetchOperationTypes = async () => {
-    const data = await get(`/operations`);
+    const response = await get(`/operations`);
 
-    if (data) {
+    if (response) {
+      const data = await response.json();
       setOperationTypes(data);
     }
 
@@ -86,9 +88,10 @@ function ExecuteOperationForm() {
         operands: [+values.operandOne, +values.operandTwo]
       };
 
-      const data = await post('/operations', body);
+      const response = await post('/operations', body);
 
-      if (data) {
+      if (response) {
+        const data = await response.json();
         setResult(data.result);
       }
 
@@ -167,6 +170,17 @@ function ExecuteOperationForm() {
             >
               Execute
             </LoadingButton>
+
+            <Button
+              fullWidth
+              color={'secondary'}
+              size='large'
+              type='button'
+              variant='contained'
+              onClick={() => navigate('/')}
+            >
+              Back
+            </Button>
 
           </Stack>
         </Form>
