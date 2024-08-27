@@ -23,7 +23,7 @@ async function fetchApi(endpoint, options = {}) {
   try {
     const response = await fetch(url, config);
 
-    if (!response.ok) {
+    if (!response.ok && !response.created) {
         if (response.status === 401 || response.status === 403) {
             errorMessage('Your session has expired, please login again');
             redirectToLogin();

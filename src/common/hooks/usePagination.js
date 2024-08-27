@@ -5,15 +5,14 @@ function usePagination(fetchAction, updateUrl = true) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [paginationConfig, setPaginationConfig] = useState({page: 1, limit: 10, term: '', sortField: 'createdAt', sortOrder: 'desc', filters: {}});
+  const [paginationConfig, setPaginationConfig] = useState({page: 1, limit: 10, term: '', sortField: 'date', sortOrder: 'desc'});
   const query = new URLSearchParams(location.search);
   const queryParams = [
     'page',
     'limit',
     'term',
     'sortField',
-    'sortOrder',
-    'filters'
+    'sortOrder'
   ]
 
   useEffect(() => {
@@ -30,7 +29,6 @@ function usePagination(fetchAction, updateUrl = true) {
         if (value && value !== '') {
           urlOptions[param] = value;
           if ((param === 'limit' || param === 'page') && !isNaN(value)) urlOptions[param] = parseInt(value);
-          if (param === 'filters') urlOptions[param] = JSON.parse(value);
         }
         
       }
@@ -40,14 +38,13 @@ function usePagination(fetchAction, updateUrl = true) {
   }
 
   function updateQueryParams(config = paginationConfig) {
-    const { page, limit, term, sortField, sortOrder, filters } = config;
+    const { page, limit, term, sortField, sortOrder } = config;
     const queryParams = new URLSearchParams(location.search);
     queryParams.set("page", page);
     queryParams.set("limit", limit);
     queryParams.set("term", term);
     queryParams.set("sortField", sortField);
     queryParams.set("sortOrder", sortOrder);
-    queryParams.set("filters", JSON.stringify(filters));
     navigate(`?${queryParams.toString()}`);
   }
 
