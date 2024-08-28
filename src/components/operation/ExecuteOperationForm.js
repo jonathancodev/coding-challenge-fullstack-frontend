@@ -1,10 +1,10 @@
 import * as Yup from 'yup';
-import React, { useEffect, useMemo, useState } from 'react';
-import { toast } from 'react-toastify';
+import React, { useEffect, useState } from 'react';
 import { Form, FormikProvider, useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
+  Container,
   MenuItem,
   Stack,
   TextField,
@@ -14,10 +14,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { LoadingButton } from '@mui/lab';
 import { get, post } from '../../common/client/fetchApi';
 import { errorMessage } from '../../common/misc/utils';
+import Navbar from '../../layouts/Navbar';
+import { ContentStyle } from '../../layouts/MainLayout';
 
 function ExecuteOperationForm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [updateBalance, setUpdateBalance] = useState(false);
   const [transactionId, setTransactionId] = useState('');
   const [operationTypes, setOperationTypes] = useState([]);
   const [result, setResult] = useState(null);
@@ -62,6 +65,7 @@ function ExecuteOperationForm() {
     },
     validationSchema: schema,
     onSubmit: async (values, { setSubmitting }) => {
+      setResult(null);
       if (values.operationType !== 'RANDOM_STRING' && (values.operandOne === null || values.operandOne === undefined || values.operandOne === '')) {
         if (values.operationType === 'SQUARE_ROOT') {
           errorMessage('Operand one is required for SQUARE_ROOT');
@@ -93,6 +97,7 @@ function ExecuteOperationForm() {
       if (response) {
         const data = await response.json();
         setResult(data.result);
+        setUpdateBalance(!updateBalance);
       }
 
       setSubmitting(false);
@@ -103,88 +108,100 @@ function ExecuteOperationForm() {
 
   return (
     <>
-      <FormikProvider value={formik}>
-        <Form autoComplete='off' noValidate onSubmit={handleSubmit}>
-          <Stack spacing={3}>
-
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              {operationTypes && <TextField
-                select
-                fullWidth
-                label='Operation'
-                {...getFieldProps('operationType')}
-                error={Boolean(touched.operationType && errors.operationType)}
-                helperText={touched.operationType && errors.operationType}
-              >
-                {operationTypes.map(ot => {
-                  return (
-                    <MenuItem key={ot.id} value={ot.operationType}>{`${ot.operationType} - \$${ot.cost}`}</MenuItem>
-                  )
-                })
-                }
-              </TextField>
-              }
-
+      <Navbar refreshBalance={updateBalance}/>
+      <Container maxWidth="sm">
+        <ContentStyle>
+          <>
+            <Stack sx={{ mb: 5 }}>
+              <Typography variant="h4" gutterBottom>
+              Execute Operation
+              </Typography>
             </Stack>
+            <FormikProvider value={formik}>
+              <Form autoComplete='off' noValidate onSubmit={handleSubmit}>
+                <Stack spacing={3}>
 
-            {formik.values.operationType !== 'RANDOM_STRING' && 
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                <TextField
-                  fullWidth
-                  type='number'
-                  label=' Operand One'
-                  {...getFieldProps('operandOne')}
-                  error={Boolean(touched.operandOne && errors.operandOne)}
-                  helperText={touched.operandOne && errors.operandOne}
-                />
-              </Stack>
-            }
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                    {operationTypes && <TextField
+                      select
+                      fullWidth
+                      label='Operation'
+                      {...getFieldProps('operationType')}
+                      error={Boolean(touched.operationType && errors.operationType)}
+                      helperText={touched.operationType && errors.operationType}
+                    >
+                      {operationTypes.map(ot => {
+                        return (
+                          <MenuItem key={ot.id} value={ot.operationType}>{`${ot.operationType} - \$${ot.cost}`}</MenuItem>
+                        )
+                      })
+                      }
+                    </TextField>
+                    }
 
-            {formik.values.operationType !== 'RANDOM_STRING' && formik.values.operationType !== 'SQUARE_ROOT' && 
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                <TextField
-                  fullWidth
-                  type='number'
-                  label=' Operand Two'
-                  {...getFieldProps('operandTwo')}
-                  error={Boolean(touched.operandTwo && errors.operandTwo)}
-                  helperText={touched.operandTwo && errors.operandTwo}
-                />
-              </Stack>
-            }
+                  </Stack>
 
-            {result && 
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                <Typography>
-                  Result: {result}
-                </Typography>
-              </Stack>
-            }
+                  {formik.values.operationType !== 'RANDOM_STRING' && 
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                      <TextField
+                        fullWidth
+                        type='number'
+                        label=' Operand One'
+                        {...getFieldProps('operandOne')}
+                        error={Boolean(touched.operandOne && errors.operandOne)}
+                        helperText={touched.operandOne && errors.operandOne}
+                      />
+                    </Stack>
+                  }
 
-            <LoadingButton
-              fullWidth
-              size='large'
-              type='submit'
-              variant='contained'
-              loading={isSubmitting}
-            >
-              Execute
-            </LoadingButton>
+                  {formik.values.operationType !== 'RANDOM_STRING' && formik.values.operationType !== 'SQUARE_ROOT' && 
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                      <TextField
+                        fullWidth
+                        type='number'
+                        label=' Operand Two'
+                        {...getFieldProps('operandTwo')}
+                        error={Boolean(touched.operandTwo && errors.operandTwo)}
+                        helperText={touched.operandTwo && errors.operandTwo}
+                      />
+                    </Stack>
+                  }
 
-            <Button
-              fullWidth
-              color={'secondary'}
-              size='large'
-              type='button'
-              variant='contained'
-              onClick={() => navigate('/')}
-            >
-              Back
-            </Button>
+                  {result && 
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                      <Typography>
+                        Result: {result}
+                      </Typography>
+                    </Stack>
+                  }
 
-          </Stack>
-        </Form>
-      </FormikProvider>
+                  <LoadingButton
+                    fullWidth
+                    size='large'
+                    type='submit'
+                    variant='contained'
+                    loading={isSubmitting}
+                  >
+                    Execute
+                  </LoadingButton>
+
+                  <Button
+                    fullWidth
+                    color={'secondary'}
+                    size='large'
+                    type='button'
+                    variant='contained'
+                    onClick={() => navigate('/')}
+                  >
+                    Back
+                  </Button>
+
+                </Stack>
+              </Form>
+            </FormikProvider>
+          </>
+        </ContentStyle>
+      </Container>
     </>
   );
 }
