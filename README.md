@@ -29,4 +29,4 @@ Check if the application is running accessing: `http://localhost:3000`
 #### Run the startup script
 - `./start.sh`
 
-Check if the application is running accessing: `http://localhost:3000`
+Check if the application is running accessing: `http://localhost:80`

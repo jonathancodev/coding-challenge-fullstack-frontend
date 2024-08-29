@@ -4,4 +4,4 @@ services:
     image: coding-challenge-fullstack-frontend:latest
     container_name: coding-challenge-fullstack-frontend
     ports:
-      - "3000:3000"
+      - "80:3000"
